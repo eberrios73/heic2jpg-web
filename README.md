@@ -6,8 +6,6 @@ There are dozens of online HEIC converters. All of them require uploading your c
 
 ![Stack: Apache + PHP + libheif](https://img.shields.io/badge/stack-Apache%20%2B%20PHP%20%2B%20libheif-blue)
 
-Built with Cursor.
-
 Author: Enrique Berrios
 
 ## The Problem
