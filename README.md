@@ -21,12 +21,10 @@ A self-service web page on any Linux box you already have. Users drag-and-drop t
 ## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/heic2jpg-web.git
+git clone https://github.com/<your_github_username>/heic2jpg-web.git
 cd heic2jpg-web
 sudo bash install.sh
 ```
-
-Replace `YOUR_USERNAME` with your GitHub username or organization after you publish the repository.
 
 That's it. The installer:
 
@@ -146,6 +144,8 @@ heic2jpg-web/
 - Ubuntu 20.04, 22.04, or 24.04 (Debian should also work)
 - Root access for installation
 - ~200MB disk space for packages
+- `apache2` + PHP (used to serve `index.html` and run `heic_convert.php`/`heic_download.php`)
+- `libheif-examples`, `ffmpeg`, and ImageMagick (converter backends used as fallbacks)
 
 ## License
 
