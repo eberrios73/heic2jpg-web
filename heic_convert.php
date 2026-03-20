@@ -26,6 +26,32 @@ function logLine($msg) {
     flush();
 }
 
+/** Resolve a CLI tool on Linux (e.g. /usr/bin) or macOS Homebrew (/opt/homebrew/bin). */
+function resolveTool(array $names) {
+    $dirs = ['/usr/bin', '/opt/homebrew/bin', '/usr/local/bin'];
+    foreach ($names as $name) {
+        if ($name !== '' && $name[0] === '/' && is_executable($name)) {
+            return $name;
+        }
+    }
+    foreach ($names as $name) {
+        foreach ($dirs as $dir) {
+            $p = $dir . '/' . $name;
+            if (is_executable($p)) {
+                return $p;
+            }
+        }
+    }
+    foreach ($names as $name) {
+        $out = [];
+        @exec('command -v ' . escapeshellarg($name) . ' 2>/dev/null', $out, $rc);
+        if (!empty($out[0]) && is_executable($out[0])) {
+            return $out[0];
+        }
+    }
+    return null;
+}
+
 // Create temp directories
 $tempId = uniqid('heic_', true);
 $tempDir = sys_get_temp_dir() . '/heic_convert_' . $tempId;
@@ -108,6 +134,10 @@ try {
     logLine("[INFO] Starting conversion of $total file(s)...");
     logLine("---");
 
+    $heifBin = resolveTool(['heif-convert']);
+    $ffmpegBin = resolveTool(['ffmpeg']);
+    $magickBin = resolveTool(['magick', 'convert']);
+
     $convertedFiles = [];
     $failedFiles = [];
     $current = 0;
@@ -132,19 +162,23 @@ try {
 
         // Try heif-convert first
         $output = [];
-        exec("/usr/bin/heif-convert -q 90 $heicEscaped $jpgEscaped 2>&1", $output, $rc);
-        if ($rc === 0 && file_exists($jpgPath)) {
-            $converted = true;
-            $size = round(filesize($jpgPath) / 1024);
-            logLine("[$current/$total] OK — heif-convert → {$baseName}.jpg ({$size} KB)");
+        if ($heifBin) {
+            exec(escapeshellarg($heifBin) . " -q 90 $heicEscaped $jpgEscaped 2>&1", $output, $rc);
+            if ($rc === 0 && file_exists($jpgPath)) {
+                $converted = true;
+                $size = round(filesize($jpgPath) / 1024);
+                logLine("[$current/$total] OK — heif-convert → {$baseName}.jpg ({$size} KB)");
+            } else {
+                logLine("[$current/$total] heif-convert failed: " . implode(' ', $output));
+            }
         } else {
-            logLine("[$current/$total] heif-convert failed: " . implode(' ', $output));
+            logLine("[$current/$total] heif-convert not found (install libheif / brew install libheif)");
         }
 
         // Fall back to ffmpeg
-        if (!$converted) {
+        if (!$converted && $ffmpegBin) {
             $output = [];
-            exec("/usr/bin/ffmpeg -y -i $heicEscaped -q:v 2 $jpgEscaped 2>&1", $output, $rc);
+            exec(escapeshellarg($ffmpegBin) . " -y -i $heicEscaped -q:v 2 $jpgEscaped 2>&1", $output, $rc);
             if ($rc === 0 && file_exists($jpgPath)) {
                 $converted = true;
                 $size = round(filesize($jpgPath) / 1024);
@@ -152,19 +186,24 @@ try {
             } else {
                 logLine("[$current/$total] ffmpeg failed: " . implode(' ', array_slice($output, -2)));
             }
+        } elseif (!$converted && !$ffmpegBin) {
+            logLine("[$current/$total] ffmpeg not found — skipping (optional fallback)");
         }
 
-        // Fall back to ImageMagick
-        if (!$converted) {
+        // Fall back to ImageMagick (magick or convert)
+        if (!$converted && $magickBin) {
             $output = [];
-            exec("/usr/bin/convert $heicEscaped $jpgEscaped 2>&1", $output, $rc);
+            exec(escapeshellarg($magickBin) . " $heicEscaped $jpgEscaped 2>&1", $output, $rc);
             if ($rc === 0 && file_exists($jpgPath)) {
                 $converted = true;
                 $size = round(filesize($jpgPath) / 1024);
-                logLine("[$current/$total] OK — convert → {$baseName}.jpg ({$size} KB)");
+                $tool = basename($magickBin);
+                logLine("[$current/$total] OK — $tool → {$baseName}.jpg ({$size} KB)");
             } else {
-                logLine("[$current/$total] convert failed: " . implode(' ', $output));
+                logLine("[$current/$total] ImageMagick failed: " . implode(' ', $output));
             }
+        } elseif (!$converted && !$magickBin) {
+            logLine("[$current/$total] ImageMagick (magick/convert) not found — skipping");
         }
 
         if ($converted) {

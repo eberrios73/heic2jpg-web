@@ -29,6 +29,17 @@ sudo apt install apache2 php libapache2-mod-php php-zip
 
 You need **Apache + PHP with the Zip extension** so the browser can POST uploads to `heic_convert.php` and the server can read ZIP archives. Any equivalent stack (e.g. nginx + `php-fpm`) can work if you point it at the same files and PHP settings — the included `install.sh` assumes Apache and deploys under `/var/www/html/heic2jpg/`.
 
+### Try it locally (macOS, quick test)
+
+Production use is still **Linux + Apache** (or your own server). On a Mac you can smoke-test with PHP’s built-in server if PHP has the `zip` extension and converter CLIs are installed (e.g. `brew install libheif imagemagick`; `ffmpeg` is optional).
+
+```bash
+cd heic2jpg-web
+php -S localhost:8080
+```
+
+Open <http://localhost:8080/> in your browser. The backend looks up `heif-convert`, `ffmpeg`, and `magick`/`convert` in `/usr/bin`, Homebrew (`/opt/homebrew/bin`), and your `PATH`.
+
 ## Quick Start
 
 ```bash
@@ -39,7 +50,7 @@ sudo bash install.sh
 
 The installer (after prerequisites are met):
 
-1. Installs ImageMagick, libheif, ffmpeg, and unzip (converter toolchain)
+1. Installs ImageMagick, libheif, and ffmpeg (converter toolchain)
 2. Upgrades libheif to 1.18+ when needed (fixes iPhone HEIC compatibility)
 3. Fixes ImageMagick's security policy to allow HEIC
 4. Configures PHP upload limits (500MB) in `php.ini`
