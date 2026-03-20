@@ -127,28 +127,6 @@ sudo chown -R www-data:www-data /var/www/html/heic2jpg
 sudo systemctl restart apache2
 ```
 
-## Publishing to GitHub
-
-From the project directory (with [GitHub CLI](https://cli.github.com/) installed and logged in):
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: self-hosted HEIC to JPG converter"
-gh repo create heic2jpg-web --public --source=. --remote=origin --push
-```
-
-Or create an empty public repository on GitHub, then:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/eberrios73/heic2jpg-web.git
-git branch -M main
-git push -u origin main
-```
-
 ## File Structure
 
 ```
