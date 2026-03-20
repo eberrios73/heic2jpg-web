@@ -21,7 +21,7 @@ A self-service web page on any Linux box you already have. Users drag-and-drop t
 ## Quick Start
 
 ```bash
-git clone https://github.com/<your_github_username>/heic2jpg-web.git
+git clone https://github.com/eberrios73/heic2jpg-web.git
 cd heic2jpg-web
 sudo bash install.sh
 ```
@@ -122,7 +122,7 @@ Or create an empty public repository on GitHub, then:
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/heic2jpg-web.git
+git remote add origin https://github.com/eberrios73/heic2jpg-web.git
 git branch -M main
 git push -u origin main
 ```
