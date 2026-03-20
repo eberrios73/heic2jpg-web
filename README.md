@@ -6,6 +6,8 @@ There are dozens of online HEIC converters. All of them require uploading your c
 
 Built with Cursor.
 
+Author: Enrique Berrios
+
 ## The Problem
 
 iPhones shoot HEIC by default. Windows can't open them without a codec from the Microsoft Store ($0.99/device, needs Microsoft accounts, doesn't deploy well via GPO/Intune). When you've got 200+ machines across multiple offices, that's not a real solution.
