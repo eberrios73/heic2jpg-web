@@ -18,6 +18,17 @@ And those free online converters? Great — until your users are uploading clien
 
 A self-service web page on any Linux box you already have. Users drag-and-drop their HEIC files (or a ZIP), get back a ZIP of JPGs. No installs on their machines. No tickets. No data leaves your network. Takes 60 seconds to deploy.
 
+## Prerequisites
+
+Install a web server and PHP yourself (this repo does **not** install Apache or PHP). On Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install apache2 php libapache2-mod-php php-zip
+```
+
+You need **Apache + PHP with the Zip extension** so the browser can POST uploads to `heic_convert.php` and the server can read ZIP archives. Any equivalent stack (e.g. nginx + `php-fpm`) can work if you point it at the same files and PHP settings — the included `install.sh` assumes Apache and deploys under `/var/www/html/heic2jpg/`.
+
 ## Quick Start
 
 ```bash
@@ -26,12 +37,12 @@ cd heic2jpg-web
 sudo bash install.sh
 ```
 
-That's it. The installer:
+The installer (after prerequisites are met):
 
-1. Installs Apache, PHP, ImageMagick, libheif, and ffmpeg
-2. Upgrades libheif to 1.18+ (fixes iPhone HEIC compatibility)
+1. Installs ImageMagick, libheif, ffmpeg, and unzip (converter toolchain)
+2. Upgrades libheif to 1.18+ when needed (fixes iPhone HEIC compatibility)
 3. Fixes ImageMagick's security policy to allow HEIC
-4. Configures PHP upload limits (500MB)
+4. Configures PHP upload limits (500MB) in `php.ini`
 5. Deploys the web files to `/var/www/html/heic2jpg/`
 6. Restarts Apache
 
@@ -47,12 +58,20 @@ Your converter will be live at `http://YOUR_SERVER_IP/heic2jpg/`
 - Returns all converted JPGs in a single ZIP download
 - No client-side installs required
 
-## What Gets Installed
+## What you install vs. what `install.sh` installs
+
+**You install (prerequisites):**
 
 | Package | Purpose |
 |---------|---------|
-| `apache2` | Web server |
-| `php` + `php-zip` | Backend processing |
+| `apache2` | Web server (serves the app) |
+| `php` + `libapache2-mod-php` | Runs `heic_convert.php` / `heic_download.php` |
+| `php-zip` | ZIP upload handling in PHP |
+
+**`install.sh` installs (via apt):**
+
+| Package | Purpose |
+|---------|---------|
 | `libheif-examples` | Primary converter (`heif-convert`) |
 | `imagemagick` | Fallback converter (`convert`) |
 | `ffmpeg` | Second fallback converter |
@@ -82,8 +101,11 @@ When Mac users create ZIP files, they include `._` resource fork files and a `__
 If you prefer to do it yourself:
 
 ```bash
-# Install packages
-sudo apt install apache2 php libapache2-mod-php php-zip imagemagick libheif-examples ffmpeg
+# Prerequisites: web server + PHP (install.sh does not install these)
+sudo apt install apache2 php libapache2-mod-php php-zip
+
+# Converter packages (or run install.sh instead of the next few package steps)
+sudo apt install imagemagick libheif-examples ffmpeg
 
 # Upgrade libheif
 sudo add-apt-repository ppa:strukturag/libheif
@@ -142,10 +164,10 @@ heic2jpg-web/
 ## Requirements
 
 - Ubuntu 20.04, 22.04, or 24.04 (Debian should also work)
-- Root access for installation
+- Root access to run `install.sh` and configure the system
+- **Apache** and **PHP** with **`php-zip`** and **`libapache2-mod-php`** (install before `install.sh`; see [Prerequisites](#prerequisites))
 - ~200MB disk space for packages
-- `apache2` + PHP (used to serve `index.html` and run `heic_convert.php`/`heic_download.php`)
-- `libheif-examples`, `ffmpeg`, and ImageMagick (converter backends used as fallbacks)
+- `libheif-examples`, `ffmpeg`, and ImageMagick (installed by `install.sh`, or install manually)
 
 ## License
 

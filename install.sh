@@ -1,6 +1,7 @@
 #!/bin/bash
 # heic2jpg-web installer
-# Installs all dependencies and configures a self-service HEIC→JPG converter
+# Expects Apache + PHP (with php-zip) already installed — see README prerequisites.
+# Installs converter packages, tunes ImageMagick/PHP for HEIC, deploys web files.
 # Tested on Ubuntu 22.04 / 24.04
 
 set -euo pipefail
@@ -33,13 +34,31 @@ if ! command -v apt-get &>/dev/null; then
     exit 1
 fi
 
+# Prerequisites (not installed by this script)
+if ! command -v apache2ctl &>/dev/null && ! command -v apachectl &>/dev/null; then
+    log_fail "Apache is not installed. Install prerequisites first, for example:"
+    echo "  sudo apt install apache2 php libapache2-mod-php php-zip"
+    exit 1
+fi
+if ! command -v php &>/dev/null; then
+    log_fail "PHP is not installed. Install prerequisites first, for example:"
+    echo "  sudo apt install apache2 php libapache2-mod-php php-zip"
+    exit 1
+fi
+if ! php -r 'exit(extension_loaded("zip") ? 0 : 1);' 2>/dev/null; then
+    log_fail "PHP zip extension is missing. Install php-zip, for example:"
+    echo "  sudo apt install php-zip"
+    exit 1
+fi
+log_ok "Apache and PHP prerequisites are present"
+
 # -------------------------------------------------------
-# 1. Install base packages
+# 1. Install converter packages
 # -------------------------------------------------------
-log_info "Installing base packages..."
+log_info "Installing converter packages..."
 apt-get update -qq
-apt-get install -y -qq apache2 php libapache2-mod-php php-zip imagemagick libheif-examples ffmpeg unzip > /dev/null 2>&1
-log_ok "Base packages installed"
+apt-get install -y -qq imagemagick libheif-examples ffmpeg > /dev/null 2>&1
+log_ok "Converter packages installed"
 
 # -------------------------------------------------------
 # 2. Upgrade libheif (fixes iPhone HEIC compatibility)
