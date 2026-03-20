@@ -1,0 +1,7 @@
+.DS_Store
+*.swp
+*.bak
+*~
+
+# Local IDE preview helpers
+.php-preview-router.php
