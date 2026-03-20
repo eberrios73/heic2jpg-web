@@ -2,7 +2,9 @@
 
 There are dozens of online HEIC converters. All of them require uploading your company's photos to someone else's server. This one runs on your network, behind your firewall, and takes 60 seconds to deploy.
 
-![Terminal-style UI with live conversion progress](https://img.shields.io/badge/stack-Apache%20%2B%20PHP%20%2B%20libheif-blue)
+![HEIC to JPG Converter — web UI](docs/ui-screenshot.png)
+
+![Stack: Apache + PHP + libheif](https://img.shields.io/badge/stack-Apache%20%2B%20PHP%20%2B%20libheif-blue)
 
 Built with Cursor.
 
@@ -142,6 +144,8 @@ sudo systemctl restart apache2
 
 ```
 heic2jpg-web/
+├── docs/
+│   └── ui-screenshot.png
 ├── install.sh          # One-command installer
 ├── index.html          # Standalone frontend (no frameworks, no dependencies)
 ├── heic_convert.php    # Backend: handles upload, conversion, streams progress
